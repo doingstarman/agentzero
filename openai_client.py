@@ -14,14 +14,15 @@ class OpenAIClient:
                          channel_settings: Dict[str, Any],
                          context: Optional[list] = None) -> str:
         """
-        Генерация ответа на сообщение с учетом настроек канала
+        Генерация ответа на сообщение с учетом настроек канала и контекста
         """
         try:
             assistant_settings = channel_settings.get('assistant_settings', {})
             
             # Формируем системный промпт
             system_prompt = assistant_settings.get('system_prompt', 
-                'Ты - дружелюбный ассистент, который отвечает на сообщения в Telegram канале. Отвечай кратко и по существу.')
+                'Ты - дружелюбный ассистент, который отвечает на сообщения в Telegram канале. '
+                'Отвечай кратко и по существу. Используй контекст предыдущих сообщений для более релевантных ответов.')
             
             # Добавляем ограничения по темам и словам
             allowed_topics = assistant_settings.get('allowed_topics', [])
@@ -34,8 +35,12 @@ class OpenAIClient:
             
             # Формируем сообщения для контекста
             messages = [{"role": "system", "content": system_prompt}]
+            
+            # Добавляем предыдущие сообщения из контекста
             if context:
                 messages.extend(context)
+            
+            # Добавляем текущее сообщение
             messages.append({"role": "user", "content": message})
             
             # Генерируем ответ
